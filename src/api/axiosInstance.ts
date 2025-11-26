@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/",
+  baseURL: "https://doctotrrefweb.onrender.com/api/",
   timeout: 5 * 60 * 1000, // 60 seconds
 }); 
 
@@ -30,7 +30,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem("refresh");
       if (refreshToken) {
         try {
-          const res = await axios.post("http://127.0.0.1:8000/api/token/refresh/", {
+          const res = await axios.post("https://doctotrrefweb.onrender.com/api/token/refresh/", {
             refresh: refreshToken,
           });
 
