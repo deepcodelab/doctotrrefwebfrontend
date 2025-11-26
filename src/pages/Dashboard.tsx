@@ -26,7 +26,7 @@ const Dashboard: React.FC = () => {
       try {
         const token = localStorage.getItem("token");
         console.log("kkdkdk", token)
-        const res = await axios.get("http://127.0.0.1:8000/api/profile/me/", {
+        const res = await axios.get("https://doctotrrefweb.onrender.com/api/profile/me/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setData(res.data);
@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://127.0.0.1:8000/api/profile/update/${formData.id}/`,
+        `https://doctotrrefweb.onrender.com/api/profile/update/${formData.id}/`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

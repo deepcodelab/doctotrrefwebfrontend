@@ -33,7 +33,7 @@ useEffect(() => {
     }
 
     try {
-      const response = await api.get("http://127.0.0.1:8000/api/doctors/", {
+      const response = await api.get("https://doctotrrefweb.onrender.com/api/doctors/", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
