@@ -428,24 +428,27 @@ const DoctorProfile: React.FC = () => {
 
               {doctor.profile.availabilities?.length ? (
   <div className="space-y-4">
-    {Object.entries(
-      doctor.profile.availabilities.reduce((acc: any, slot: any) => {
-        if (!acc[slot.day]) acc[slot.day] = [];
-        acc[slot.day].push(slot);
-        return acc;
-      }, {})
-    ).map(([day, slots]: [string, any[]]) => (
-      <div key={day} className="bg-white rounded-xl p-4 shadow border border-blue-100">
-        <h3 className="font-semibold text-blue-700 mb-2">{day}</h3>
-        <div className="space-y-1">
-          {slots.map((slot, idx) => (
-            <div key={idx} className="text-gray-600 text-sm">
-              • {slot.start_time} – {slot.end_time}
-            </div>
-          ))}
-        </div>
+{Object.entries(
+  doctor.profile.availabilities.reduce((acc: Record<string, any[]>, slot: any) => {
+    if (!acc[slot.day]) acc[slot.day] = [];
+    acc[slot.day].push(slot);
+    return acc;
+  }, {} as Record<string, any[]>)
+).map(([day, slots]) => {
+  const daySlots = slots as any[]; // 👈 cast slots as array
+  return (
+    <div key={day} className="bg-white rounded-xl p-4 shadow border border-blue-100">
+      <h3 className="font-semibold text-blue-700 mb-2">{day}</h3>
+      <div className="space-y-1">
+        {daySlots.map((slot: any, idx: number) => (
+          <div key={idx} className="text-gray-600 text-sm">
+            • {slot.start_time} – {slot.end_time}
+          </div>
+        ))}
       </div>
-    ))}
+    </div>
+  );
+})}
   </div>
 ) : (
   <p className="text-gray-500 italic">No availability set</p>

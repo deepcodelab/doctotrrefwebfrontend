@@ -8,7 +8,6 @@ import {
   HeartPulse,
   Star,
   Stethoscope,
-  MapPin,
   Phone,
   ClipboardList,
   Edit3,

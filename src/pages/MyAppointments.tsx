@@ -1,8 +1,7 @@
 // MyAppointments.tsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import api from '../api/axiosInstance'
-import { Calendar, Video, XCircle, CheckCircle2 } from "lucide-react";
+import { Video } from "lucide-react";
 
 type Status = "pending" | "upcoming" | "completed" | "cancelled";
 

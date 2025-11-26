@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Calendar, DollarSign, Users, Star } from "lucide-react";
 
 const DoctorHome: React.FC = () => {
-  const [doctorName, setDoctorName] = useState("Dr. Shubham");
-  const [appointments, setAppointments] = useState(8);
-  const [patients, setPatients] = useState(25);
-  const [earnings, setEarnings] = useState(14500);
-  const [rating, setRating] = useState(4.8);
+  const [doctorName] = useState("Dr. Shubham");
+  const [appointments] = useState(8);
+  const [patients] = useState(25);
+  const [earnings] = useState(14500);
+  const [rating] = useState(4.8);
 
   useEffect(() => {
     // In a real app, fetch doctor details + dashboard stats here

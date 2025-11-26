@@ -16,6 +16,7 @@ type Doctor = {
   consultation_fee?: number;
   bio?: string;
   experience_years?: number;
+  slug?: string;
 };
 
 const DoctorDetails: React.FC = () => {
@@ -26,11 +27,12 @@ const DoctorDetails: React.FC = () => {
   const [doctor, setDoctor] = useState<Doctor | null>(preloaded ?? null);
   const [loading, setLoading] = useState<boolean>(!preloaded);
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [recommended, setRecommended] = useState([]);
-const [loadingReco, setLoadingReco] = useState(true);
+
+  // ✅ Properly typed recommended array
+  const [recommended, setRecommended] = useState<Doctor[]>([]);
+  const [loadingReco, setLoadingReco] = useState(true);
 
   useEffect(() => {
-    console.log("kkkkk")
     if (doctor || !id) return;
 
     const fetchDoctor = async () => {
@@ -40,10 +42,8 @@ const [loadingReco, setLoadingReco] = useState(true);
         const res = await api.get(`doctors/${id}/`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        console.log("ncncncn", res)
 
         const data = res.data?.data ?? res.data;
-        console.log("doctor", data)
         setDoctor(data);
       } catch (err) {
         console.error("Error:", err);
@@ -56,27 +56,27 @@ const [loadingReco, setLoadingReco] = useState(true);
   }, [doctor, id]);
 
   useEffect(() => {
-  if (!doctor?.id) return; // Wait until doctor is loaded
+    if (!doctor?.id) return;
 
-  const fetchRecommended = async () => {
-    try {
-      setLoadingReco(true);
+    const fetchRecommended = async () => {
+      try {
+        setLoadingReco(true);
+        const token = localStorage.getItem("token");
+        const res = await api.get(`recommend/from-doctor/${doctor.id}/`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
 
-      const token = localStorage.getItem("token");
-      const res = await api.get(`recommend/from-doctor/${doctor.id}/`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+        // ✅ Typecast response to Doctor[]
+        setRecommended(res.data?.recommended as Doctor[] || []);
+      } catch (err) {
+        console.error("Recommendation API error:", err);
+      } finally {
+        setLoadingReco(false);
+      }
+    };
 
-      setRecommended(res.data?.recommended || []);
-    } catch (err) {
-      console.error("Recommendation API error:", err);
-    } finally {
-      setLoadingReco(false);
-    }
-  };
-
-  fetchRecommended();
-}, [doctor]);
+    fetchRecommended();
+  }, [doctor]);
 
   if (loading)
     return (
@@ -94,69 +94,55 @@ const [loadingReco, setLoadingReco] = useState(true);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-10 px-4 md:px-8">
-      
+
       {/* Header Card */}
       <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl p-10 border border-white/40">
-        
+
         {/* Top Section */}
         <div className="flex flex-col md:flex-row gap-10 items-center">
-          
           <img
             src={doctor.profile_picture || "https://via.placeholder.com/200"}
             className="w-44 h-44 rounded-2xl object-cover shadow-xl border-4 border-white"
-            alt="Doctor"
+            alt={doctor.user_name || "Doctor"}
           />
 
-          {/* Doctor Info */}
           <div className="flex-1">
             <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-              Dr. {doctor.user_name}
+              Dr. {doctor.user_name || "Unknown"}
             </h1>
-
             <p className="text-lg text-blue-600 mt-1 font-medium">
-              {doctor.specialization}
+              {doctor.specialization || "General Physician"}
             </p>
 
-            {/* Rating & Address */}
             <div className="flex flex-wrap items-center gap-5 mt-4">
-
               <div className="flex items-center gap-2 text-yellow-500">
                 <Star className="w-5 h-5" />
                 <span className="font-semibold text-gray-800">
                   {doctor.rating ?? "4.5"}
                 </span>
               </div>
-
               <div className="flex items-center gap-2 text-gray-600">
                 <MapPin className="w-5 h-5 text-blue-500" />
                 <span>{doctor.clinic_address || "City Clinic"}</span>
               </div>
-
             </div>
 
-            {/* Experience */}
             <div className="mt-3 flex items-center gap-2 text-gray-700">
               <Award className="w-5 h-5 text-indigo-500" />
-              <span>
-                {doctor.experience_years || 5}+ years experience
-              </span>
+              <span>{doctor.experience_years || 5}+ years experience</span>
             </div>
           </div>
-
         </div>
 
-        {/* Bio Section */}
+        {/* Bio */}
         <div className="mt-10">
-          <h2 className="text-xl font-semibold text-gray-900 mb-3">
-            About Doctor
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">About Doctor</h2>
           <p className="text-gray-700 leading-relaxed">
-            {doctor.bio ||
-              "Dedicated healthcare professional with a patient-first mindset, providing high-quality care with compassion and expertise."}
+            {doctor.bio || "Dedicated healthcare professional providing high-quality care with compassion."}
           </p>
         </div>
 
-        {/* Fee Section */}
+        {/* Fee */}
         <div className="mt-6 p-5 bg-blue-50 rounded-2xl border border-blue-100 flex items-center gap-3">
           <Building2 className="w-6 h-6 text-blue-600" />
           <p className="text-gray-700">
@@ -183,74 +169,77 @@ const [loadingReco, setLoadingReco] = useState(true);
             <Mail className="w-5 h-5" /> Contact
           </a>
         </div>
-              {/* Recommended Doctors */}
-<div className="max-w-5xl mx-auto mt-16">
-  <h2 className="text-3xl font-bold mb-6 text-gray-900">
-    Recommended Doctors
-  </h2>
 
-  {loadingReco ? (
-    <p className="text-gray-500">Loading recommendations...</p>
-  ) : recommended.length === 0 ? (
-    <p className="text-gray-600">No similar doctors found.</p>
-  ) : (
-    <div className="flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
-      {recommended.map((doc) => (
-        <motion.div
-          key={doc.id}
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 200 }}
-          className="min-w-[260px] bg-white/80 backdrop-blur-lg border border-white/40 shadow-lg 
-                     rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer 
-                     hover:shadow-2xl transition-all duration-300"
-        >
-          <img
-            src={doc.profile_picture || "https://via.placeholder.com/120"}
-            className="w-28 h-28 rounded-2xl object-cover shadow-md mb-4"
-          />
+        {/* Recommended */}
+        <div className="max-w-5xl mx-auto mt-16">
+          <h2 className="text-3xl font-bold mb-6 text-gray-900">
+            Recommended Doctors
+          </h2>
 
-          <h3 className="text-xl font-semibold text-gray-900">Dr. {doc.user_name}</h3>
+          {loadingReco ? (
+            <p className="text-gray-500">Loading recommendations...</p>
+          ) : recommended.length === 0 ? (
+            <p className="text-gray-600">No similar doctors found.</p>
+          ) : (
+            <div className="flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
+              {recommended.map((doc: Doctor) => (
+                <motion.div
+                  key={doc.id}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                  className="min-w-[260px] bg-white/80 backdrop-blur-lg border border-white/40 shadow-lg 
+                             rounded-3xl p-5 flex flex-col items-center text-center cursor-pointer 
+                             hover:shadow-2xl transition-all duration-300"
+                >
+                  <img
+                    src={doc.profile_picture || "https://via.placeholder.com/120"}
+                    className="w-28 h-28 rounded-2xl object-cover shadow-md mb-4"
+                  />
 
-          <p className="text-blue-600 font-medium text-sm mt-1">
-            {doc.specialization}
-          </p>
+                  <h3 className="text-xl font-semibold text-gray-900">Dr. {doc.user_name}</h3>
 
-          <div className="flex justify-center gap-3 mt-3 text-sm text-gray-600">
-            <span className="flex items-center gap-1">
-              ⭐ {doc.rating || "4.5"}
-            </span>
+                  <p className="text-blue-600 font-medium text-sm mt-1">
+                    {doc.specialization}
+                  </p>
 
-            <span className="flex items-center gap-1">
-              💰 ₹{doc.consultation_fee || 500}
-            </span>
-          </div>
+                  <div className="flex justify-center gap-3 mt-3 text-sm text-gray-600">
+                    <span className="flex items-center gap-1">
+                      ⭐ {doc.rating || "4.5"}
+                    </span>
 
-          <div className="w-full mt-4 flex gap-2">
-            <button
-              onClick={() => window.location.href = `/doctors/${doc.slug || doc.id}`}
-              className="flex-1 py-2 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 transition"
-            >
-              View
-            </button>
+                    <span className="flex items-center gap-1">
+                      💰 ₹{doc.consultation_fee || 500}
+                    </span>
+                  </div>
 
-            <button
-              onClick={() => window.location.href = `/doctors/${doc.slug || doc.id}?book=true`}
-              className="flex-1 py-2 rounded-xl bg-white text-blue-600 border border-blue-600 
-                         hover:bg-blue-50 transition"
-            >
-              Book
-            </button>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  )}
-</div>
+                  <div className="w-full mt-4 flex gap-2">
+                    <button
+                      onClick={() =>
+                        window.location.href = `/doctors/${doc.slug || doc.id}`
+                      }
+                      className="flex-1 py-2 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 transition"
+                    >
+                      View
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        window.location.href = `/doctors/${doc.slug || doc.id}?book=true`
+                      }
+                      className="flex-1 py-2 rounded-xl bg-white text-blue-600 border border-blue-600 
+                                 hover:bg-blue-50 transition"
+                    >
+                      Book
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
 
       </div>
 
-
-      {/* Modal */}
       {openModal && <BookModal doctor={doctor} onClose={() => setOpenModal(false)} />}
     </div>
   );

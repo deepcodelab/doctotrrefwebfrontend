@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom"
-import { Calendar, MessageSquare, Stethoscope, Heart, Clock } from "lucide-react";
+import { Link } from "react-router-dom"
+import { Calendar, MessageSquare, Stethoscope, Heart } from "lucide-react";
 
 const PatientHome: React.FC = () => {
-  const [userName, setUserName] = useState("Shubham");
-  const [upcomingAppointments, setUpcomingAppointments] = useState(2);
-  const [consultations, setConsultations] = useState(5);
-  const [doctors, setDoctors] = useState(18);
-  const navigate = useNavigate()
+  const [userName] = useState("Shubham");
+  const [upcomingAppointments] = useState(2);
+  const [consultations] = useState(5);
+  const [doctors] = useState(18);
+  // const navigate = useNavigate()
 
 
   useEffect(() => {

@@ -8,6 +8,7 @@ type Doctor = {
   user_name?: string;
   user_email?: string;
   profile_image?: string;
+  image_url?: string;
   specialization?: string;
   rating?: number;
   clinic_address?: string;
@@ -21,9 +22,8 @@ const DoctorList: React.FC = () => {
   const navigate = useNavigate();
 
   const makeSlug = (name: string) =>
-  name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
-  // Fetch Doctors
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -37,8 +37,6 @@ const DoctorList: React.FC = () => {
           : Array.isArray(res.data)
           ? res.data
           : [];
-
-        console.log("lll", list)
 
         setDoctors(list);
       } catch (err) {
@@ -64,7 +62,6 @@ const DoctorList: React.FC = () => {
         Find Your Specialist
       </h1>
 
-      {/* Doctor Grid */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {doctors.map((doc) => (
           <div
@@ -73,25 +70,25 @@ const DoctorList: React.FC = () => {
           >
             {/* IMAGE */}
             <img
-              src={doc.image_url}
-              alt=""
+              src={doc.image_url || doc.profile_image || "https://via.placeholder.com/150"}
+              alt={doc.user_name ? `Dr. ${doc.user_name}` : "Doctor"}
               onClick={() =>
-                navigate(`/doctors/${doc.id}`, { state: { doctor: doc } })
+                navigate(
+                  `/doctors/${doc.user_name ? makeSlug(doc.user_name) : doc.id}`,
+                  { state: { doctor: doc } }
+                )
               }
               className="w-full h-56 object-cover rounded-2xl shadow-md border"
             />
 
-            {/* DOCTOR NAME */}
             <h2 className="mt-5 text-2xl font-bold text-gray-900">
-              Dr. {doc.user_name}
+              Dr. {doc.user_name || "Unknown"}
             </h2>
 
-            {/* SPECIALIZATION */}
             <p className="text-blue-600 font-medium">
               {doc.specialization || "General Physician"}
             </p>
 
-            {/* Rating & Address */}
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2 text-yellow-500">
                 <Star className="w-5 h-5" />
@@ -106,7 +103,6 @@ const DoctorList: React.FC = () => {
               </div>
             </div>
 
-            {/* Fee */}
             <p className="mt-3 text-gray-700">
               Fee:
               <span className="font-semibold text-blue-700 ml-1">
@@ -114,31 +110,23 @@ const DoctorList: React.FC = () => {
               </span>
             </p>
 
-            {/* Buttons */}
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() =>
-                  navigate(`/doctors/${makeSlug(doc.user_name)}`, { state: { doctor: doc } })
+                  navigate(
+                    `/doctors/${doc.user_name ? makeSlug(doc.user_name) : doc.id}`,
+                    { state: { doctor: doc } }
+                  )
                 }
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 transition-all flex-1 justify-center"
               >
                 View Profile <ArrowRight className="w-4 h-4" />
               </button>
-
-              {/* <button
-                onClick={() =>
-                  navigate(`/doctors/${doc.id}`, { state: { doctor: doc, openModal: true } })
-                }
-                className="px-4 py-2 rounded-xl border border-gray-300 text-gray-800 bg-white hover:bg-gray-100 shadow flex-1"
-              >
-                Book Now
-              </button> */}
             </div>
           </div>
         ))}
       </div>
 
-      {/* If no doctors */}
       {doctors.length === 0 && (
         <p className="text-center text-gray-700 mt-12 text-lg">
           No doctors available at the moment.
