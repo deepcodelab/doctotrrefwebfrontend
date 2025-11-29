@@ -3,6 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContexts";
 
+// const mode = import.meta.env.REACT_APP_MODE;
+const mode = "development"
+
+const API_URL =
+  mode === "development"
+    ? "http://localhost:8000"
+    : "https://doctotrrefweb.onrender.com"
+
+
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); // 👈 use context
@@ -16,7 +25,7 @@ const Login: React.FC = () => {
   setLoading(true);
 
   try {
-    const res = await axios.post("https://doctotrrefweb.onrender.com/api/login/", { email, password });
+    const res = await axios.post(`${API_URL}/api/login/`, { email, password });
     console.log("gggg", res)
 
     const { access, refresh, user } = res.data;

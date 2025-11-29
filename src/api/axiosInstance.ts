@@ -1,7 +1,15 @@
 import axios from "axios";
 
+// const mode = import.meta.env.REACT_APP_MODE;
+const mode = "development";
+
+const API_URL =
+  mode === "development"
+    ? "http://localhost:8000"
+    : "https://doctotrrefweb.onrender.com"
+
 const api = axios.create({
-  baseURL: "https://doctotrrefweb.onrender.com/api/",
+  baseURL: `${API_URL}/api/`,
   timeout: 5 * 60 * 1000, // 60 seconds
 }); 
 
@@ -30,7 +38,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem("refresh");
       if (refreshToken) {
         try {
-          const res = await axios.post("https://doctotrrefweb.onrender.com/api/token/refresh/", {
+          const res = await axios.post('http://localhost:8000/api/token/refresh/', {
             refresh: refreshToken,
           });
 

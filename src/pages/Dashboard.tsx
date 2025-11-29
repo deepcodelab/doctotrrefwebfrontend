@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,6 +13,8 @@ import {
   X,
   Save,
 } from "lucide-react";
+import api from '../api/axiosInstance'
+
 
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
@@ -26,7 +27,7 @@ const Dashboard: React.FC = () => {
       try {
         const token = localStorage.getItem("token");
         console.log("kkdkdk", token)
-        const res = await axios.get("https://doctotrrefweb.onrender.com/api/profile/me/", {
+        const res = await api.get("profile/me/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setData(res.data);
@@ -47,8 +48,8 @@ const Dashboard: React.FC = () => {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `https://doctotrrefweb.onrender.com/api/profile/update/${formData.id}/`,
+      await api.put(
+        'profile/update/${formData.id}/',
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -74,6 +75,7 @@ const Dashboard: React.FC = () => {
         No user data found 😔
       </div>
     );
+    console.log(data, "llllllll")
 
   const { role, user, profile } = data;
   const isDoctor = role === "doctor";
@@ -188,11 +190,19 @@ const Dashboard: React.FC = () => {
 
           <div className="flex justify-center items-center">
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="w-44 h-44 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center text-4xl text-blue-700 font-bold shadow-md ring-4 ring-blue-200"
-            >
-              {user?.name?.[0]?.toUpperCase()}
-            </motion.div>
+  whileHover={{ scale: 1.05 }}
+  className="w-44 h-44 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center text-4xl text-blue-700 font-bold shadow-md ring-4 ring-blue-200 overflow-hidden"
+>
+  {profile?.profile_picture ? (
+    <img
+      src={profile.profile_picture}
+      alt="Profile"
+      className="w-full h-full object-cover rounded-full"
+    />
+  ) : (
+    user?.name?.[0]?.toUpperCase()
+  )}
+</motion.div>
           </div>
         </div>
       </motion.section>

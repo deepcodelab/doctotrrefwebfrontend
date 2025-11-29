@@ -9,7 +9,7 @@ type Doctor = {
   id: number;
   user_name?: string;
   user_email?: string;
-  profile_picture?: string;
+  image_url?: string;
   specialization?: string;
   rating?: number;
   clinic_address?: string;
@@ -42,7 +42,6 @@ const DoctorDetails: React.FC = () => {
         const res = await api.get(`doctors/${id}/`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-
         const data = res.data?.data ?? res.data;
         setDoctor(data);
       } catch (err) {
@@ -101,7 +100,7 @@ const DoctorDetails: React.FC = () => {
         {/* Top Section */}
         <div className="flex flex-col md:flex-row gap-10 items-center">
           <img
-            src={doctor.profile_picture || "https://via.placeholder.com/200"}
+            src={doctor.image_url || "https://via.placeholder.com/200"}
             className="w-44 h-44 rounded-2xl object-cover shadow-xl border-4 border-white"
             alt={doctor.user_name || "Doctor"}
           />
@@ -192,7 +191,7 @@ const DoctorDetails: React.FC = () => {
                              hover:shadow-2xl transition-all duration-300"
                 >
                   <img
-                    src={doc.profile_picture || "https://via.placeholder.com/120"}
+                    src={doc.image_url || "https://via.placeholder.com/120"}
                     className="w-28 h-28 rounded-2xl object-cover shadow-md mb-4"
                   />
 

@@ -2,6 +2,13 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const mode = "development"
+
+const API_URL =
+  mode === "development"
+    ? "http://localhost:8000"
+    : "https://doctotrrefweb.onrender.com"
+
 const Register: React.FC = () => {
   const navigate = useNavigate();
 
@@ -30,7 +37,7 @@ const Register: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://doctotrrefweb.onrender.com/api/user-register/",
+        `${API_URL}/api/user-register/`,
         formData
       );
 

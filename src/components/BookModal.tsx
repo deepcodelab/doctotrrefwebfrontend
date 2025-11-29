@@ -124,10 +124,12 @@ export default function BookModal({ doctor, onClose, onBooked }: Props) {
         try {
           // API: GET /appointments/?doctor=<id>&date=YYYY-MM-DD
           const token = localStorage.getItem("token");
+          console.log("token",token)
           const res = await api.get("appointments/", {
             params: { doctor: doctor.id, date: selectedDate },
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
+          console.log("kfjfjfj", res.data)
 
           let payload = res.data;
           let items: any[] = [];
