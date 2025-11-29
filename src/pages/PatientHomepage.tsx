@@ -34,8 +34,9 @@ const PatientHome: React.FC = () => {
     const fetchHomePage = async () => {
       try {
         setLoading(true);
-        const name = JSON.parse(localStorage.getItem('user'))
-        setUserName(name.name)
+        const userString = localStorage.getItem("user") || "{}";
+        const user = JSON.parse(userString);
+        setUserName(user.name);
 
         const token = localStorage.getItem("token");
         console.log("vvvv", token)
@@ -81,7 +82,7 @@ const PatientHome: React.FC = () => {
               name: appt.doctorName,
               specialty: appt.specialty,
               rating: Math.round((Math.random() * 1 + 4) * 10) / 10,
-              image: appt.image,
+              image: appt.image ?? "/default-doctor.png",
             });
           }
         });

@@ -13,7 +13,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar,
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import api from '../api/axiosInstance'
 
@@ -66,7 +66,7 @@ export default function DoctorHomePage() {
 });
   const [schedule, setSchedule] = useState<Appt[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
-  const [notifCount, setNotifCount] = useState(3);
+  const [notifCount] = useState(3);
   const [activeReviewIndex, setActiveReviewIndex] = useState(0);
 
   useEffect(() => {
