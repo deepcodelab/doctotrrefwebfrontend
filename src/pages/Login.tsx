@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { AuthContext } from "../contexts/AuthContexts";
+import api from '../api/axiosInstance'
 
 // const mode = import.meta.env.REACT_APP_MODE;
 
@@ -19,7 +19,7 @@ const Login: React.FC = () => {
   setLoading(true);
 
   try {
-    const res = await axios.post("http://localhost:8000/api/login/", { email, password });
+    const res = await api.post("login/", { email, password });
     console.log("gggg", res)
 
     const { access, refresh, user } = res.data;
