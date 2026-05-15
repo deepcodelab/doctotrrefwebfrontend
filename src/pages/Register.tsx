@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
+import api from "../api/axiosInstance";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +30,8 @@ const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://doctotrrefwebfrontend1.vercel.app//api/user-register/",
+      const response = await api.post(
+        "user-register/",
         formData
       );
 

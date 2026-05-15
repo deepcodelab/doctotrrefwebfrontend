@@ -72,10 +72,12 @@ useEffect(() => {
   };
 
   const logout = () => {
+    console.log("jhshsh")
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("refresh");
     setIsAuthenticated(false);
+    console.log("kkkk",localStorage.getItem("user"))
     setUser(null);
   };
 

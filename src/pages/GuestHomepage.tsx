@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import guesthomepage from "../assets/guesthomepage.png";
 
 const HomeGuest: React.FC = () => {
   return (
@@ -46,7 +47,7 @@ const HomeGuest: React.FC = () => {
 
           <div className="p-4 bg-white/60 backdrop-blur-xl rounded-3xl shadow-xl hover:shadow-2xl transition relative z-10">
             <img
-              src="https://cdn.dribbble.com/users/32512/screenshots/17066933/media/98a47de9f936d4d8b1e7847fef90bb2b.png"
+              src={guesthomepage}
               alt="Doctor Illustration"
               className="w-[430px] md:w-[470px] rounded-2xl hover:scale-105 transition-transform"
             />

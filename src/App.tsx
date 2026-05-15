@@ -11,6 +11,8 @@ import DoctorAppointments from "./pages/DoctorAppointment";
 import DoctorProfile from "./pages/DoctorProfile";
 import DoctorDetails from "./pages/DoctorDetails";
 import ChatWidget from "./components/ChatWidget";
+import CallRoom from "./pages/CallRoom";
+import PatientHistory from "./pages/PatientHistory";
 
 const App = () => (
   <Router>
@@ -21,11 +23,13 @@ const App = () => (
       <Route path="/register"  element={<Register/>} />
       <Route path="/doctors" element={<BookAppointment/>} />
       <Route path="/appointments" element={<MyAppointments/>} />
+      <Route path="/call/:room" element={<CallRoom />} />
       <Route path="/dashboard" element={<Dashboard/>} />
       <Route path="/profile" element={<DoctorProfile></DoctorProfile>} />
       <Route path="/book-appointment" element={<BookAppointment/>} />
       <Route path="/my-appointment" element={<DoctorAppointments/>} />
       <Route path="/doctors/:id" element={<DoctorDetails />}></Route>
+      <Route path="/patient-history" element={<PatientHistory />} />
     </Routes>
     <ChatWidget />
   </Router>

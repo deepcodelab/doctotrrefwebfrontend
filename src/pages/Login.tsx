@@ -19,7 +19,7 @@ const Login: React.FC = () => {
   setLoading(true);
 
   try {
-    const res = await axios.post("https://doctotrrefwebfrontend1.vercel.app//api/login/", { email, password });
+    const res = await axios.post("http://localhost:8000/api/login/", { email, password });
     console.log("gggg", res)
 
     const { access, refresh, user } = res.data;

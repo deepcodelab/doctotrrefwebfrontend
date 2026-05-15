@@ -4,7 +4,7 @@ import api from "../api/axiosInstance";
 
 type Availability = {
   id?: number;
-  day: string; // e.g. "Monday"
+  date: string; // e.g. "Monday"
   start_time: string; // "09:00:00" or "09:00"
   end_time: string; // "12:30:00" or "12:30"
 };
@@ -16,7 +16,7 @@ type Doctor = {
   profile_picture?: string;
   clinic_address?: string;
   consultation_fee?: number;
-  availabilities?: Availability[];
+  date_availabilities?: Availability[];
 };
 
 type Props = {
@@ -75,7 +75,8 @@ export default function BookModal({ doctor, onClose, onBooked }: Props) {
   // weekday name e.g. "Monday"
   const weekdayName = useMemo(() => {
     if (!selectedDate) return "";
-    return new Date(selectedDate).toLocaleDateString("en-US", { weekday: "long" });
+    return selectedDate;
+    // return new Date(selectedDate).toLocaleDateString("en-US", { weekday: "long" });
   }, [selectedDate]);
 
   // Build slots for selectedDate from doctor.availabilities
@@ -83,13 +84,14 @@ export default function BookModal({ doctor, onClose, onBooked }: Props) {
     setSelectedTime("");
     setSlots([]);
     setBookedSlots([]);
-    if (!selectedDate || !doctor?.availabilities) return;
+    if (!selectedDate || !doctor?.date_availabilities) return;
 
     setLoadingSlots(true);
 
     try {
-      const availForDay = (doctor.availabilities || []).filter(
-        (a) => String(a.day).toLowerCase() === weekdayName.toLowerCase()
+      console.log("doctor", doctor.date_availabilities)
+      const availForDay = (doctor.date_availabilities || []).filter(
+        (a) => String(a.date).toLowerCase() === weekdayName.toLowerCase()
       );
 
       let all: string[] = [];
@@ -101,6 +103,7 @@ export default function BookModal({ doctor, onClose, onBooked }: Props) {
           all = all.concat(gen);
         }
       });
+      console.log(all, "alll")
 
       // dedupe & sort
       all = Array.from(new Set(all)).sort((a, b) => a.localeCompare(b));
@@ -108,8 +111,11 @@ export default function BookModal({ doctor, onClose, onBooked }: Props) {
       const isToday =
         selectedDate === new Date().toISOString().slice(0, 10);
 
+      console.log("lll", selectedDate)
+
       if (isToday) {
         const now = new Date();
+        console.log("lll", now)
         all = all.filter((t) => {
           const [hh, mm] = t.split(":").map(Number);
           const d = new Date(selectedDate);
@@ -117,7 +123,7 @@ export default function BookModal({ doctor, onClose, onBooked }: Props) {
           return d >= now;
         });
       }
-
+      console.log("llh",all)
       setSlots(all);
       // fetch booked slots after generating
       (async () => {

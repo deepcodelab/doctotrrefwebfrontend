@@ -21,22 +21,42 @@ import api from "../api/axiosInstance";
 const EditDoctorModal = ({ doctor, onClose, onSave }: any) => {
   const [formData, setFormData] = useState({ ...doctor });
 
+  // const handleChange = (e: any) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
+
   const handleChange = (e: any) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const { name, value, type } = e.target;
+
+  setFormData((prev: any) => ({
+    ...prev,
+    profile: {
+      ...prev.profile,
+      [name]:
+        type === "number"
+          ? value === ""
+            ? ""
+            : Number(value)
+          : value,
+    },
+  }));
+};
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      console.log("api is", api)
+      console.log("vnvn", formData.profile.clinic_name)
 
         const payload = {
-      clinic_name: formData.clinic_name,
-      clinic_address: formData.clinic_address,
-      experience_years: formData.experience_years,
-      consultation_fee: formData.consultation_fee,
-      description: formData.description,
+      clinic_name: formData.profile.clinic_name,
+      clinic_address: formData.profile.clinic_address,
+      experience_years: formData.profile.experience_years,
+      consultation_fee: formData.profile.consultation_fee,
+      description: formData.profile.description,
         };
+        console.log("jdjdj",payload)
       const res = await api.patch("profile/me/", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -140,7 +160,7 @@ const EditDoctorModal = ({ doctor, onClose, onSave }: any) => {
 
 // ------------------ Add Availability Modal -------------------
 const AddAvailabilityModal = ({ onClose, onSave }: any) => {
-  const [day, setDay] = useState("");
+  const [date, setDate] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
@@ -148,7 +168,7 @@ const AddAvailabilityModal = ({ onClose, onSave }: any) => {
   e.preventDefault();
 
   // 🧩 1️⃣ Required field validation
-  if (!day || !start || !end) {
+  if (!date || !start || !end) {
     alert("Please fill all fields (day, start time, and end time).");
     return;
   }
@@ -173,7 +193,7 @@ const AddAvailabilityModal = ({ onClose, onSave }: any) => {
 
     await api.post(
       "availability/",
-      { day, start_time: start, end_time: end },
+      { date, start_time: start, end_time: end },
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
@@ -204,71 +224,67 @@ const AddAvailabilityModal = ({ onClose, onSave }: any) => {
 //   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="bg-white rounded-3xl shadow-2xl p-8 w-96"
-      >
-        <h3 className="text-lg font-semibold mb-4 text-blue-700">
-          Add Availability
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <select
-            value={day}
-            onChange={(e) => setDay(e.target.value)}
-            className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500"
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
+    <motion.div
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="bg-white rounded-3xl shadow-2xl p-8 w-96"
+    >
+      <h3 className="text-lg font-semibold mb-4 text-blue-700">
+        Add Availability
+      </h3>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        
+        {/* Date Input */}
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          required
+        />
+
+        {/* Time Inputs */}
+        <div className="flex gap-2">
+          <input
+            type="time"
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            className="w-1/2 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="time"
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            className="w-1/2 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300"
           >
-            <option value="">Select Day</option>
-            {[
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-              "Sunday",
-            ].map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+            Cancel
+          </button>
 
-          <div className="flex gap-2">
-            <input
-              type="time"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              className="w-1/2 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="time"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              className="w-1/2 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </motion.div>
+  </div>
+);
 
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
-  );
 };
 
 // ------------------ Main Profile -------------------
@@ -277,6 +293,10 @@ const DoctorProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
 
   const fetchDoctorProfile = async () => {
     try {
@@ -406,54 +426,57 @@ const DoctorProfile: React.FC = () => {
                 </button>
               </div>
 
-              {/* {doctor.profile.availabilities?.length ? (
-                <div className="space-y-3">
-                  {doctor.profile.availabilities.map((slot: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="flex justify-between items-center bg-white rounded-xl px-4 py-2 shadow border border-blue-100"
-                    >
-                      <span className="font-medium text-gray-700">
-                        {slot.day}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {slot.start_time} - {slot.end_time}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No availability set</p>
-              )} */}
+              {/* Date Picker */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Date:
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
 
-              {doctor.profile.availabilities?.length ? (
-  <div className="space-y-4">
-{Object.entries(
-  doctor.profile.availabilities.reduce((acc: Record<string, any[]>, slot: any) => {
-    if (!acc[slot.day]) acc[slot.day] = [];
-    acc[slot.day].push(slot);
-    return acc;
-  }, {} as Record<string, any[]>)
-).map(([day, slots]) => {
-  const daySlots = slots as any[]; // 👈 cast slots as array
-  return (
-    <div key={day} className="bg-white rounded-xl p-4 shadow border border-blue-100">
-      <h3 className="font-semibold text-blue-700 mb-2">{day}</h3>
-      <div className="space-y-1">
-        {daySlots.map((slot: any, idx: number) => (
-          <div key={idx} className="text-gray-600 text-sm">
-            • {slot.start_time} – {slot.end_time}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-})}
-  </div>
-) : (
-  <p className="text-gray-500 italic">No availability set</p>
-)}
+              {/* Display selected date's availability */}
+              {(() => {
+                const selectedDateSlots = doctor.profile.date_availabilities?.filter(
+                  (slot: any) => slot.date === selectedDate
+                ) || [];
 
+                return (
+                  <div className="bg-white rounded-xl p-4 shadow border border-blue-100">
+                    <h3 className="font-semibold text-blue-700 mb-3">
+                      {new Date(selectedDate).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        weekday: "long",
+                      })}
+                    </h3>
+
+                    {selectedDateSlots.length > 0 ? (
+                      <div className="space-y-2">
+                        {selectedDateSlots.map((slot: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="flex justify-between items-center bg-blue-50 rounded-lg px-3 py-2 border border-blue-200"
+                          >
+                            <span className="text-sm font-medium text-gray-700">
+                              {slot.start_time} – {slot.end_time}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic text-sm">
+                        No availability for this date
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
             </motion.div>
 
             {/* Contact Info */}

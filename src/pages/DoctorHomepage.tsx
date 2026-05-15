@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Bell,
@@ -48,13 +49,9 @@ const earningsData = [
   { day: "Sun", earnings: 1900, appts: 3 },
 ];
 
-const reviews: Review[] = [
-  { id: 1, name: "Anita K.", rating: 5, text: "Very professional and attentive. Highly recommended!", date: "3 days ago" },
-  { id: 2, name: "Rahul S.", rating: 5, text: "Clear diagnosis, good follow-up.", date: "1 week ago" },
-  { id: 3, name: "Simran P.", rating: 4, text: "Helpful and patient. Clinic was clean.", date: "2 weeks ago" },
-];
 
 export default function DoctorHomePage() {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState("");
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [stats, setStats] = useState<docStats>({
@@ -66,6 +63,7 @@ export default function DoctorHomePage() {
 });
   const [schedule, setSchedule] = useState<Appt[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [notifCount] = useState(3);
   const [activeReviewIndex, setActiveReviewIndex] = useState(0);
 
@@ -134,8 +132,22 @@ export default function DoctorHomePage() {
       }));
 
       setSchedule(formattedAppointments);
-    } catch {}
-    // TODO: replace mocked data with real fetch calls
+
+      // Fetch reviews
+      const reviewsRes = await api.get('reviews/', {headers: {Authorization:`Bearer ${token}`}});
+      const reviewsData = reviewsRes.data.data || reviewsRes.data || [];
+      const formattedReviews = reviewsData.map((r: any) => ({
+        id: r.id,
+        name: r.customer_name || r.user_name || 'Anonymous',
+        rating: r.rating,
+        text: r.comment || '',
+        date: r.created_at ? new Date(r.created_at).toLocaleDateString() : 'Recently'
+      }));
+      setReviews(formattedReviews);
+
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
   }
 
   fetchData();
@@ -143,9 +155,10 @@ export default function DoctorHomePage() {
 
   // Auto-advance reviews carousel
   useEffect(() => {
+    if (reviews.length === 0) return;
     const t = setInterval(() => setActiveReviewIndex((i) => (i + 1) % reviews.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [reviews]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 text-gray-800 p-6 lg:p-10">
@@ -204,10 +217,10 @@ export default function DoctorHomePage() {
               <button className="px-4 py-2 rounded-lg bg-indigo-600 text-white shadow hover:bg-indigo-700 flex items-center gap-2">
                 <Video className="w-4 h-4" /> Start Video Consult
               </button>
-              <button className="px-4 py-2 rounded-lg border border-gray-200 flex items-center gap-2">
-                <Plus className="w-4 h-4" /> New Appointment
-              </button>
-              <button className="px-4 py-2 rounded-lg border border-gray-200 flex items-center gap-2">
+              <button
+                onClick={() => navigate('/patient-history')}
+                className="px-4 py-2 rounded-lg border border-gray-200 flex items-center gap-2 hover:bg-gray-50"
+              >
                 <FileText className="w-4 h-4" /> Patient History
               </button>
             </div>
@@ -282,21 +295,25 @@ export default function DoctorHomePage() {
             </div>
 
             <div className="space-y-3">
-              {reviews.map((r, i) => (
-                <div key={r.id} className={`p-4 rounded-lg transition ${i === activeReviewIndex ? "bg-indigo-50 border border-indigo-100" : "bg-white"}`}>
-                  <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-semibold text-indigo-700">{r.name[0]}</div>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <div className="font-medium">{r.name}</div>
-                        <div className="text-xs text-gray-500">{r.date}</div>
+              {reviews.length === 0 ? (
+                <div className="text-center text-gray-500 py-4">No reviews yet</div>
+              ) : (
+                reviews.map((r, i) => (
+                  <div key={r.id} className={`p-4 rounded-lg transition ${i === activeReviewIndex ? "bg-indigo-50 border border-indigo-100" : "bg-white"}`}>
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center font-semibold text-indigo-700">{r.name[0]}</div>
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <div className="font-medium">{r.name}</div>
+                          <div className="text-xs text-gray-500">{r.date}</div>
+                        </div>
+                        <div className="text-sm text-gray-700 mt-1">{r.text}</div>
+                        <div className="mt-2 text-xs text-yellow-500">{"★".repeat(Math.round(r.rating))}</div>
                       </div>
-                      <div className="text-sm text-gray-700 mt-1">{r.text}</div>
-                      <div className="mt-2 text-xs text-yellow-500">{"★".repeat(Math.round(r.rating))}</div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

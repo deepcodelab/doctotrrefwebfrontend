@@ -1,12 +1,13 @@
 // MyAppointments.tsx
 import React, { useEffect, useState } from "react";
 import api from '../api/axiosInstance'
-import { Video } from "lucide-react";
-
+import { Video, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 type Status = "pending" | "upcoming" | "completed" | "cancelled";
 
 interface Appointment {
   id: number;
+  doctorId: number;
   doctorName: string;
   specialty: string;
   date: string; // ISO date
@@ -23,11 +24,18 @@ const formatDate = (iso: string) => {
 };
 
 const MyAppointments: React.FC = () => {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [filter, setFilter] = useState<Status | "all">("all");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Appointment | null>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedForReview, setSelectedForReview] = useState<Appointment | null>(null);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -42,8 +50,10 @@ const MyAppointments: React.FC = () => {
         : response.data.data || [];
 
         console.log("kkkk", appointmentList)
+        console.log("First appointment structure:", appointmentList[0])
         const formattedAppointments = appointmentList.map((a: any) => ({
   id: a.id,
+  doctorId: a.doctor,
   doctorName: a.doctor_name,
   specialty: a.specialty || "General Physician", // fallback if not provided
   date: a.appointment_date,
@@ -89,6 +99,41 @@ const MyAppointments: React.FC = () => {
     setAppointments((prev) => prev.map((p) => (p.id === id ? { ...p, date: newDate, time: newTime } : p)));
     setModalOpen(false);
     setSelected(null);
+  };
+
+  const openReviewModal = (appointment: Appointment) => {
+    setSelectedForReview(appointment);
+    setRating(0);
+    setHoverRating(0);
+    setComment("");
+    setReviewModalOpen(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedForReview || rating === 0) return;
+
+    try {
+      setReviewLoading(true);
+      const token = localStorage.getItem("token");
+      await api.post('reviews/', {
+        doctor_id: selectedForReview.doctorId,
+        rating,
+        comment: comment || null,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setReviewModalOpen(false);
+      setSelectedForReview(null);
+      setRating(0);
+      setComment("");
+      alert("Review submitted successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit review. Please try again.");
+    } finally {
+      setReviewLoading(false);
+    }
   };
 
   return (
@@ -196,14 +241,11 @@ const MyAppointments: React.FC = () => {
                       {a.status === "upcoming" && (
                         <>
                           <button
-                            onClick={() => {
-                              // Implement join call (open video session)
-                              window.alert("Joining call... (wire up with meeting link)");
-                            }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white text-sm hover:bg-green-700"
-                          >
-                            <Video size={16} /> Join
-                          </button>
+  onClick={() => navigate(`/call/${a.id}`)}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white text-sm hover:bg-green-700"
+>
+  <Video size={16} /> Join
+</button>
 
                           <button
                             onClick={() => openReschedule(a)}
@@ -222,7 +264,15 @@ const MyAppointments: React.FC = () => {
                       )}
 
                       {a.status === "completed" && (
-                        <div className="text-sm text-gray-600">You visited this doctor on {formatDate(a.date)}.</div>
+                        <>
+                          <div className="text-sm text-gray-600">You visited this doctor on {formatDate(a.date)}.</div>
+                          <button
+                            onClick={() => openReviewModal(a)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-yellow-500 text-white text-sm hover:bg-yellow-600"
+                          >
+                            <Star size={16} /> Review
+                          </button>
+                        </>
                       )}
 
                       {a.status === "cancelled" && (
@@ -266,6 +316,82 @@ const MyAppointments: React.FC = () => {
                 className="px-4 py-2 rounded bg-blue-600 text-white"
               >
                 Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {reviewModalOpen && selectedForReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800">Review Doctor</h3>
+            <p className="text-sm text-gray-500 mt-1">Dr. {selectedForReview.doctorName} — {selectedForReview.specialty}</p>
+
+            <div className="mt-6">
+              <label className="text-sm text-gray-600 block mb-2">Rating</label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="p-1 transition-transform hover:scale-110"
+                  >
+                    <Star
+                      size={28}
+                      className={`${
+                        star <= (hoverRating || rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      } transition-colors`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {rating > 0 && (
+                <p className="text-sm text-gray-500 mt-1">
+                  {rating === 1 && "Poor"}
+                  {rating === 2 && "Fair"}
+                  {rating === 3 && "Good"}
+                  {rating === 4 && "Very Good"}
+                  {rating === 5 && "Excellent"}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <label className="text-sm text-gray-600 block mb-2">Comment (optional)</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Share your experience with this doctor..."
+                className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+              />
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setReviewModalOpen(false);
+                  setSelectedForReview(null);
+                  setRating(0);
+                  setComment("");
+                }}
+                className="px-4 py-2 rounded bg-white border border-gray-200 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={rating === 0 || reviewLoading}
+                className="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {reviewLoading ? "Submitting..." : "Submit Review"}
               </button>
             </div>
           </div>
