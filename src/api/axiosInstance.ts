@@ -17,10 +17,16 @@ const getBaseURL = () => {
   return baseURL;
 };
 
+// const api = axios.create({
+//   baseURL: `${getBaseURL()}/api/`,
+//   timeout: 5 * 60 * 1000, // 60 seconds
+// }); 
+
 const api = axios.create({
-  baseURL: `${getBaseURL()}/api/`,
+  baseURL: "https://doctotrrefweb.onrender.com/api/",
   timeout: 5 * 60 * 1000, // 60 seconds
 }); 
+
 
 // Request interceptor → attach access token
 api.interceptors.request.use(
