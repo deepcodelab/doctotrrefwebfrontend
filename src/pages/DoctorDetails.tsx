@@ -5,11 +5,19 @@ import api from "../api/axiosInstance";
 import BookModal from "../components/BookModal";
 import { motion } from "framer-motion";
 
+type Availability = {
+  id?: number;
+  date: string;
+  start_time: string;
+  end_time: string;
+};
+
 type Doctor = {
   id: number;
   user_name?: string;
   user_email?: string;
   image_url?: string;
+  profile_picture?: string;
   specialization?: string;
   rating?: number;
   clinic_address?: string;
@@ -17,6 +25,7 @@ type Doctor = {
   bio?: string;
   experience_years?: number;
   slug?: string;
+  date_availabilities?: Availability[];
 };
 
 const DoctorDetails: React.FC = () => {
@@ -25,7 +34,7 @@ const DoctorDetails: React.FC = () => {
   const preloaded = (location.state as any)?.doctor as Doctor | undefined;
 
   const [doctor, setDoctor] = useState<Doctor | null>(preloaded ?? null);
-  const [loading, setLoading] = useState<boolean>(!preloaded);
+  const [loading, setLoading] = useState<boolean>(true);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
   // ✅ Properly typed recommended array
@@ -33,26 +42,29 @@ const DoctorDetails: React.FC = () => {
   const [loadingReco, setLoadingReco] = useState(true);
 
   useEffect(() => {
-    if (doctor || !id) return;
+    // Always fetch fresh by numeric ID so date_availabilities is current
+    const doctorId = preloaded?.id ?? id;
+    if (!doctorId) return;
 
     const fetchDoctor = async () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const res = await api.get(`doctors/${id}/`, {
+        const res = await api.get(`doctors/${doctorId}/`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = res.data?.data ?? res.data;
         setDoctor(data);
       } catch (err) {
         console.error("Error:", err);
+        if (preloaded) setDoctor(preloaded);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDoctor();
-  }, [doctor, id]);
+  }, [id]);
 
   useEffect(() => {
     if (!doctor?.id) return;

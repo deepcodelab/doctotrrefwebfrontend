@@ -349,6 +349,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
+  CalendarDays,
   User,
   HeartPulse,
   Star,
@@ -361,6 +362,8 @@ import {
 } from "lucide-react";
 
 import api from "../api/axiosInstance";
+import axios from "axios";
+
 
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
@@ -368,8 +371,21 @@ const Dashboard: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<any>({});
 
+  const connectGoogleCalendar = async () => {
+    const res = await api.get("google-calendar/connect/", {
+      withCredentials: true,
+    });
+    window.location.href = res.data.auth_url;
+  };
+
   // FETCH PROFILE
   useEffect(() => {
+    // If redirected back from Google OAuth, clean up the URL param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("google_calendar") === "connected") {
+      window.history.replaceState({}, "", "/dashboard");
+    }
+
     const fetchProfile = async () => {
       try {
         setLoading(true);
@@ -577,6 +593,19 @@ const Dashboard: React.FC = () => {
               ? "+ Add Appointment"
               : "+ Book Appointment"}
           </Link>
+
+          <button
+  onClick={connectGoogleCalendar}
+  className={`px-6 py-3 rounded-xl font-medium shadow-lg transition ${
+    data?.profile?.google_calendar_connected
+      ? "bg-green-100 text-green-700"
+      : "bg-green-600 text-white hover:bg-green-700"
+  }`}
+>
+  {data?.profile?.google_calendar_connected
+    ? "✅ Calendar Connected"
+    : "Connect Google Calendar"}
+</button>
         </motion.div>
       </motion.header>
 

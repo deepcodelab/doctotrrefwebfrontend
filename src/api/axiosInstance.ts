@@ -23,8 +23,8 @@ const getBaseURL = () => {
 // }); 
 
 const api = axios.create({
-  baseURL: "https://doctotrrefweb.onrender.com/api/",
-  // baseURL : "http://127.0.0.1:8000/api/",
+  // baseURL: "https://doctotrrefweb.onrender.com/api/",
+  baseURL : "http://127.0.0.1:8000/api/",
   timeout: 5 * 60 * 1000, // 60 seconds
 }); 
 

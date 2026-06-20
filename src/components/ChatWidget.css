@@ -43,11 +43,20 @@
   background: #f9fafb;
 }
 
+/* .message {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  max-width: 75%;
+  border-radius: 12px;
+} */
+
 .message {
   padding: 8px 12px;
   margin-bottom: 8px;
   max-width: 75%;
   border-radius: 12px;
+
+  white-space: pre-line;
 }
 
 .message.user {
